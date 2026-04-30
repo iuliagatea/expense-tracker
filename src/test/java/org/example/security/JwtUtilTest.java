@@ -1,5 +1,6 @@
 package org.example.security;
 
+import org.example.model.AppUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,7 @@ import static org.assertj.core.api.Assertions.*;
 public class JwtUtilTest {
 
     private JwtUtil jwtUtil;
+    private String username = "testuser";
 
     @BeforeEach
     public void setUp() {
@@ -16,9 +18,6 @@ public class JwtUtilTest {
 
     @Test
     public void testGenerateToken_ShouldCreateValidToken() {
-        // Arrange
-        String username = "testuser";
-
         // Act
         String token = jwtUtil.generateToken(username);
 
@@ -30,7 +29,6 @@ public class JwtUtilTest {
     @Test
     public void testExtractUsername_ShouldReturnCorrectUsername() {
         // Arrange
-        String username = "testuser";
         String token = jwtUtil.generateToken(username);
 
         // Act
@@ -43,7 +41,6 @@ public class JwtUtilTest {
     @Test
     public void testValidateToken_WithValidToken_ShouldReturnTrue() {
         // Arrange
-        String username = "testuser";
         String token = jwtUtil.generateToken(username);
 
         // Act
@@ -56,7 +53,6 @@ public class JwtUtilTest {
     @Test
     public void testValidateToken_WithInvalidUsername_ShouldReturnFalse() {
         // Arrange
-        String username = "testuser";
         String token = jwtUtil.generateToken(username);
 
         // Act
@@ -69,19 +65,18 @@ public class JwtUtilTest {
     @Test
     public void testValidateToken_WithNullToken_ShouldThrowException() {
         // Assert
-        assertThatThrownBy(() -> jwtUtil.validateToken(null, "testuser"))
+        assertThatThrownBy(() -> jwtUtil.validateToken(null, username))
                 .isInstanceOf(Exception.class);
     }
 
     @Test
     public void testGenerateToken_DifferentUsers_ShouldGenerateDifferentTokens() {
         // Arrange
-        String user1 = "user1";
-        String user2 = "user2";
+        String username2 = "differentuser";
 
         // Act
-        String token1 = jwtUtil.generateToken(user1);
-        String token2 = jwtUtil.generateToken(user2);
+        String token1 = jwtUtil.generateToken(username);
+        String token2 = jwtUtil.generateToken(username2) ;
 
         // Assert
         assertThat(token1).isNotEqualTo(token2);

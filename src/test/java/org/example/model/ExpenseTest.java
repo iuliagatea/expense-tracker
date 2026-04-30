@@ -9,6 +9,7 @@ public class ExpenseTest {
 
     private Expense expense;
     private AppUser testUser;
+    private Category testCategory;
 
     @BeforeEach
     public void setUp() {
@@ -16,6 +17,9 @@ public class ExpenseTest {
         testUser = new AppUser();
         testUser.setId(1L);
         testUser.setUsername("testuser");
+        testCategory = new Category();
+        testCategory.setId(1L);
+        testCategory.setName("Food");
     }
 
     @Test
@@ -81,14 +85,12 @@ public class ExpenseTest {
 
     @Test
     public void testSetAndGetCategory_ShouldWorkCorrectly() {
-        // Arrange
-        String category = "Food";
-
         // Act
-        expense.setCategory(category);
+        expense.setCategory(testCategory);
 
         // Assert
-        assertThat(expense.getCategory()).isEqualTo("Food");
+        assertThat(expense.getCategory()).isEqualTo(testCategory);
+        assertThat(expense.getCategory().getName()).isEqualTo("Food");
     }
 
     @Test
@@ -130,7 +132,6 @@ public class ExpenseTest {
     public void testSetAllFields_ShouldWorkCorrectly() {
         // Arrange
         String date = "2024-04-07";
-        String category = "Food";
         double amount = 35.75;
         String account = "Cash";
         String note = "Grocery shopping";
@@ -139,7 +140,7 @@ public class ExpenseTest {
         // Act
         expense.setId(1L);
         expense.setDate(date);
-        expense.setCategory(category);
+        expense.setCategory(testCategory);
         expense.setAmount(amount);
         expense.setAccount(account);
         expense.setNote(note);
@@ -149,7 +150,7 @@ public class ExpenseTest {
         // Assert
         assertThat(expense.getId()).isEqualTo(1L);
         assertThat(expense.getDate()).isEqualTo(date);
-        assertThat(expense.getCategory()).isEqualTo(category);
+        assertThat(expense.getCategory()).isEqualTo(testCategory);
         assertThat(expense.getAmount()).isEqualTo(amount);
         assertThat(expense.getAccount()).isEqualTo(account);
         assertThat(expense.getNote()).isEqualTo(note);

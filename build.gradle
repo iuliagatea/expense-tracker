@@ -31,6 +31,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6' // For JSON serialization
 
+    // Source: https://mvnrepository.com/artifact/com.github.librepdf/openpdf
+    implementation group: 'com.github.librepdf', name: 'openpdf', version: '3.0.3'
+
     testImplementation platform('org.junit:junit-bom:6.0.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

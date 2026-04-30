@@ -8,6 +8,7 @@ import Expenses from './pages/Expenses';
 import AddExpense from './pages/AddExpense';
 import EditExpense from './pages/EditExpense';
 import Categories from './pages/Categories';
+import ImportExpenses from './pages/ImportExpenses';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './App.css';
@@ -51,6 +52,11 @@ function App() {
               <Route path="/categories" element={
                 <ProtectedRoute>
                   <Categories />
+                </ProtectedRoute>
+              } />
+              <Route path="/expenses/import" element={
+                <ProtectedRoute>
+                  <ImportExpenses />
                 </ProtectedRoute>
               } />
               <Route path="/" element={<Navigate to="/dashboard" />} />

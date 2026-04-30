@@ -1,9 +1,11 @@
 package org.example.service;
 
+import org.example.config.CurrentUser;
 import org.example.dto.AppUserDTO;
 import org.example.dto.AuthDTO;
 import org.example.dto.AuthResponseDTO;
 import org.example.model.AppUser;
+import org.example.model.Category;
 import org.example.model.Role;
 import org.example.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,9 @@ public class AuthServiceImplTest {
     private UserService userService;
 
     @Mock
+    private CategoryService categoryService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -36,41 +41,55 @@ public class AuthServiceImplTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private CurrentUser currentUser;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
     private AppUserDTO testUserDTO;
     private AuthDTO testAuthDTO;
     private AppUser testUser;
+    private Category testCategory;
+    private String username = "testuser";
 
     @BeforeEach
     public void setUp() {
         testUserDTO = new AppUserDTO();
         testUserDTO.setFullName("Test User");
-        testUserDTO.setUsername("testuser");
+        testUserDTO.setUsername(username);
         testUserDTO.setPassword("password123");
 
         testAuthDTO = new AuthDTO();
-        testAuthDTO.setUsername("testuser");
+        testAuthDTO.setUsername(username);
         testAuthDTO.setPassword("password123");
 
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setUsername(username);
         testUser.setFullName("Test User");
         testUser.setPassword("encodedPassword");
         testUser.setRole(Role.USER);
+
+        currentUser = new CurrentUser();
+        currentUser.setCurrentUser(testUser);
+
+        testCategory = new Category();
+        testCategory.setId(1L);
+        testCategory.setName("Food");
+        testCategory.setUser(testUser);
     }
 
     @Test
     public void testRegisterUser_WithNewUser_ShouldReturnSuccessResponse() {
         // Arrange
-        when(userService.findByUsename("testuser")).thenReturn(null);
+        when(userService.findByUsename(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
+        when(categoryService.addCategory(any(Category.class))).thenReturn(testCategory);
         when(authenticationManager.authenticate(any()))
                 .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken("testuser")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         AuthResponseDTO response = authService.registerUser(testUserDTO);
@@ -86,7 +105,7 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_WithExistingUsername_ShouldReturnErrorResponse() {
         // Arrange
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
+        when(userService.findByUsename(username)).thenReturn(testUser);
 
         // Act
         AuthResponseDTO response = authService.registerUser(testUserDTO);
@@ -104,7 +123,7 @@ public class AuthServiceImplTest {
         // Arrange
         when(authenticationManager.authenticate(any()))
                 .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken("testuser")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         AuthResponseDTO response = authService.loginUser(testAuthDTO);
@@ -114,7 +133,7 @@ public class AuthServiceImplTest {
         assertThat(response.getToken()).isEqualTo("jwt-token");
         assertThat(response.getMessage()).isEqualTo("Success");
         verify(authenticationManager, times(1)).authenticate(any());
-        verify(jwtUtil, times(1)).generateToken("testuser");
+        verify(jwtUtil, times(1)).generateToken(username);
     }
 
     @Test
@@ -137,18 +156,18 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_ShouldSetUserRoleToUSER() {
         // Arrange
-        when(userService.findByUsename("testuser")).thenReturn(null);
+        when(userService.findByUsename(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
 
         AppUser savedUser = new AppUser();
         savedUser.setId(1L);
-        savedUser.setUsername("testuser");
+        savedUser.setUsername(username);
         savedUser.setRole(Role.USER);
 
         when(userService.saveUser(any(AppUser.class))).thenReturn(savedUser);
         when(authenticationManager.authenticate(any()))
                 .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken("testuser")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         authService.registerUser(testUserDTO);
@@ -164,24 +183,24 @@ public class AuthServiceImplTest {
         // Arrange
         when(authenticationManager.authenticate(any()))
                 .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken("testuser")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         authService.loginUser(testAuthDTO);
 
         // Assert
-        verify(jwtUtil, times(1)).generateToken("testuser");
+        verify(jwtUtil, times(1)).generateToken(username);
     }
 
     @Test
     public void testRegisterUser_ShouldEncodePassword() {
         // Arrange
-        when(userService.findByUsename("testuser")).thenReturn(null);
+        when(userService.findByUsename(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
         when(authenticationManager.authenticate(any()))
                 .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken("testuser")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         authService.registerUser(testUserDTO);

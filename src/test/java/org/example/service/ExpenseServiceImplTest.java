@@ -40,8 +40,10 @@ public class ExpenseServiceImplTest {
     @BeforeEach
     public void setUp() {
         foodCategory = new Category();
+        foodCategory.setId(1L);
         foodCategory.setName("Food");
         transportCategory = new Category();
+        transportCategory.setId(2L);
         transportCategory.setName("Transport");
 
         testUser = new AppUser();

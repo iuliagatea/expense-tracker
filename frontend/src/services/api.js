@@ -97,6 +97,17 @@ export const expenseService = {
     const response = await api.delete(`/expenses/${id}`);
     return response.data;
   },
+
+  importExpenses: async (formData) => {
+    const response = await api.post('/expenses/import', formData, {
+     method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    return response.data;
+  },
 };
 
 // Category API

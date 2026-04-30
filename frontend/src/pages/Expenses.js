@@ -91,6 +91,33 @@ const Expenses = () => {
     }
   };
 
+  const handleExportPDF = async () => {
+    try {
+      const response = await fetch('/expenses/users/export/pdf', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `expenses_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        setError('Failed to export PDF');
+      }
+    } catch (err) {
+      setError('Failed to export PDF');
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString();
@@ -135,9 +162,14 @@ const Expenses = () => {
     <div className="expenses">
       <div className="expenses-header">
         <h1>All Transactions</h1>
-        <Link to="/expenses/add" className="btn btn-primary">
-          Add New Transaction
-        </Link>
+        <div className="expenses-actions">
+          <button onClick={handleExportPDF} className="btn btn-secondary">
+            Export PDF
+          </button>
+          <Link to="/expenses/add" className="btn btn-primary">
+            Add New Transaction
+          </Link>
+        </div>
       </div>
 
       {error && (

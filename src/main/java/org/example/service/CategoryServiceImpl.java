@@ -30,6 +30,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Optional<Category> getCategoryByName(String name, Long userId) {
+        return categoryRepository.findByNameAndUserId(name, userId);
+    }
+
+    @Override
     public Category addCategory(Category category) {
         return categoryRepository.save(category);
     }

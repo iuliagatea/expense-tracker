@@ -8,6 +8,11 @@ spring:
     url: jdbc:mysql://localhost/expensedb
     username: root
     password: Pas$4MyLocalSQL
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect

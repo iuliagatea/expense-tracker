@@ -24,9 +24,6 @@ const Navbar = () => {
         </Link>
 
         <div className="navbar-menu">
-          <Link to="/dashboard" className="navbar-link">
-            Dashboard
-          </Link>
           <Link to="/expenses" className="navbar-link">
             Transactions
           </Link>
@@ -35,6 +32,9 @@ const Navbar = () => {
           </Link>
           <Link to="/expenses/add" className="navbar-link">
             Add Transaction
+          </Link>
+          <Link to="/expenses/import" className="navbar-link">
+            Import Transactions
           </Link>
         </div>
 

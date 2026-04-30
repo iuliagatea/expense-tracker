@@ -9,6 +9,11 @@
   margin-bottom: 30px;
 }
 
+.expenses-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .expenses-header h1 {
   color: var(--primary-color);
   margin: 0;

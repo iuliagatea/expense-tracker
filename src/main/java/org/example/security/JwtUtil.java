@@ -2,6 +2,9 @@ package org.example.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.example.config.CurrentUser;
+import org.example.model.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -11,12 +14,12 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-
     private final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
 
     // Method to generate a JWT token
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)  // Setting the username as the subject of the token
@@ -28,8 +31,6 @@ public class JwtUtil {
 
     // Method to extract the username from the JWT token
     public String extractUsername(String token) {
-        System.out.println("extract username from token: " + token);
-        System.out.println("Claims "+extractAllClaims(token).getSubject());
         return extractAllClaims(token).getSubject();  // The subject field contains the username
     }
 

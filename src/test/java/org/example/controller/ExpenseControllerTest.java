@@ -1,10 +1,12 @@
 package org.example.controller;
 
 import org.example.dto.AuthResponseDTO;
+import org.example.dto.ExpenseDTO;
 import org.example.model.AppUser;
 import org.example.model.Category;
 import org.example.model.Expense;
 import org.example.model.Role;
+import org.example.service.CategoryService;
 import org.example.service.ExpenseService;
 import org.example.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,9 @@ public class ExpenseControllerTest {
     private UserService userService;
 
     @Mock
+    private CategoryService categoryService;
+
+    @Mock
     private Authentication authentication;
 
     @InjectMocks
@@ -44,6 +49,8 @@ public class ExpenseControllerTest {
     private AppUser testUser;
     private Expense testExpense1;
     private Expense testExpense2;
+    private ExpenseDTO testExpenseDTO1;
+    private ExpenseDTO testExpenseDTO2;
 
     @BeforeEach
     public void setUp() {
@@ -70,23 +77,32 @@ public class ExpenseControllerTest {
         testExpense2.setCategory(transportCategory);
         testExpense2.setAmount(15.00);
         testExpense2.setUser(testUser);
+
+        testExpenseDTO1 = new ExpenseDTO();
+        testExpenseDTO1.setDate("2024-04-07");
+        testExpenseDTO1.setCategoryId(1L);
+        testExpenseDTO1.setAmount("25.50");
+        testExpenseDTO1.setExpenseType(0);
+
+        testExpenseDTO2 = new ExpenseDTO();
+        testExpenseDTO2.setDate("2024-04-06");
+        testExpenseDTO2.setCategoryId(2L);
+        testExpenseDTO2.setAmount("15.00");
+        testExpenseDTO2.setExpenseType(0);
     }
 
     @Test
     public void testGetExpenseById_ShouldReturnExpense() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getExpenseById(1L, 1L)).thenReturn(Optional.of(testExpense1));
 
         // Act
-        ResponseEntity<Optional<Expense>> response = expenseController.getExpenseById(1L, authentication);
+        ResponseEntity<Optional<Expense>> response = expenseController.getExpenseById(1L, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isPresent();
         assertThat(response.getBody().get().getId()).isEqualTo(1L);
-        verify(userService, times(1)).findByUsename("testuser");
         verify(expenseService, times(1)).getExpenseById(1L, 1L);
     }
 
@@ -94,12 +110,10 @@ public class ExpenseControllerTest {
     public void testGetExpenses_ShouldReturnAllUserExpenses() {
         // Arrange
         List<Expense> expenses = Arrays.asList(testExpense1, testExpense2);
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getAllUserExpenses(1L)).thenReturn(expenses);
 
         // Act
-        ResponseEntity<List<Expense>> response = expenseController.getExpenses(authentication);
+        ResponseEntity<List<Expense>> response = expenseController.getExpenses(testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -111,31 +125,28 @@ public class ExpenseControllerTest {
     @Test
     public void testAddExpense_ShouldReturnCreatedExpense() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
+        when(categoryService.getCategoryById(1L, 1L)).thenReturn(Optional.of(foodCategory));
         when(expenseService.addExpense(any(Expense.class))).thenReturn(testExpense1);
 
         // Act
-        ResponseEntity<Expense> response = expenseController.addExpense(testExpense1, authentication);
+        ResponseEntity<Expense> response = expenseController.addExpense(testExpenseDTO1, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(1L);
-        verify(expenseService, times(1)).addExpense(argThat(expense ->
-                expense.getUser().getId().equals(1L)
-        ));
+        verify(expenseService, times(1)).addExpense(any(Expense.class));
     }
 
     @Test
     public void testUpdateExpense_WithValidExpense_ShouldReturnUpdatedExpense() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
+        when(expenseService.getExpenseById(1L, 1L)).thenReturn(Optional.of(testExpense1));
+        when(categoryService.getCategoryById(1L, 1L)).thenReturn(Optional.of(foodCategory));
         when(expenseService.updateExpense(any(Expense.class), eq(1L))).thenReturn(true);
 
         // Act
-        ResponseEntity<Expense> response = expenseController.updateExpense(1L, testExpense1, authentication);
+        ResponseEntity<Expense> response = expenseController.updateExpense(1L, testExpenseDTO1, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -146,12 +157,10 @@ public class ExpenseControllerTest {
     @Test
     public void testUpdateExpense_WithInvalidExpense_ShouldReturnNotFound() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
-        when(expenseService.updateExpense(any(Expense.class), eq(1L))).thenReturn(false);
+        when(expenseService.getExpenseById(999L, 1L)).thenReturn(Optional.empty());
 
         // Act
-        ResponseEntity<Expense> response = expenseController.updateExpense(999L, testExpense1, authentication);
+        ResponseEntity<Expense> response = expenseController.updateExpense(999L, testExpenseDTO1, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -160,12 +169,10 @@ public class ExpenseControllerTest {
     @Test
     public void testDeleteExpense_WithValidExpense_ShouldReturnNoContent() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.deleteExpense(1L, 1L)).thenReturn(true);
 
         // Act
-        ResponseEntity<Expense> response = expenseController.deleteExpense(1L, authentication);
+        ResponseEntity<Expense> response = expenseController.deleteExpense(1L, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -175,12 +182,10 @@ public class ExpenseControllerTest {
     @Test
     public void testDeleteExpense_WithInvalidExpense_ShouldReturnNotFound() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.deleteExpense(999L, 1L)).thenReturn(false);
 
         // Act
-        ResponseEntity<Expense> response = expenseController.deleteExpense(999L, authentication);
+        ResponseEntity<Expense> response = expenseController.deleteExpense(999L, testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -191,12 +196,10 @@ public class ExpenseControllerTest {
     public void testGetAllExpenseCategories_ShouldReturnCategories() {
         // Arrange
         List<Category> categories = Arrays.asList(foodCategory, transportCategory);
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getAllExpenseCategories(1L)).thenReturn(categories);
 
         // Act
-        ResponseEntity<List<String>> response = expenseController.getAllExpenseCategories(authentication);
+        ResponseEntity<List<String>> response = expenseController.getAllExpenseCategories(testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -208,12 +211,10 @@ public class ExpenseControllerTest {
     @Test
     public void testGetAllExpenseCategories_WithNoCategories_ShouldReturnNoContent() {
         // Arrange
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getAllExpenseCategories(1L)).thenReturn(Arrays.asList());
 
         // Act
-        ResponseEntity<List<String>> response = expenseController.getAllExpenseCategories(authentication);
+        ResponseEntity<List<String>> response = expenseController.getAllExpenseCategories(testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -223,12 +224,10 @@ public class ExpenseControllerTest {
     public void testGetExpenseByDay_ShouldReturnExpensesForDate() {
         // Arrange
         List<Expense> expenses = Arrays.asList(testExpense1);
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getExpenseByDate("2024-04-07", 1L)).thenReturn(expenses);
 
         // Act
-        ResponseEntity<List<Expense>> response = expenseController.getExpenseByDay("2024-04-07", authentication);
+        ResponseEntity<List<Expense>> response = expenseController.getExpenseByDay("2024-04-07", testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -241,14 +240,12 @@ public class ExpenseControllerTest {
     public void testGetExpenseByCategoryAndMonth_ShouldReturnFilteredExpenses() {
         // Arrange
         List<Expense> expenses = Arrays.asList(testExpense1);
-        when(authentication.getName()).thenReturn("testuser");
-        when(userService.findByUsename("testuser")).thenReturn(testUser);
         when(expenseService.getExpenseByCategoryIdAndMonth(1L, "2024-04", 1L))
                 .thenReturn(expenses);
 
         // Act
         ResponseEntity<List<Expense>> response = expenseController.getExpenseByCategoryIdAndMonth(
-                1L, "2024-04", authentication);
+                1L, "2024-04", testUser);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

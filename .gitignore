@@ -4,6 +4,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .kotlin
+/frontend/node_modules/.cache/
+/frontend/node_modules/.cache/default-development/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
