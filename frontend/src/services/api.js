@@ -49,6 +49,11 @@ export const authService = {
     const response = await api.post('/signup', userData);
     return response.data;
   },
+
+  changePassword: async (passwordData) => {
+    const response = await api.post('/users/password', passwordData);
+    return response.data;
+  },
 };
 
 // Expense API

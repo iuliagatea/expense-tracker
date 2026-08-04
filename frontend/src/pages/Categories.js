@@ -153,7 +153,7 @@ const Categories = () => {
             <p>No categories found. <button className="link-button" onClick={() => setShowAddForm(true)}>Add your first category</button></p>
           </div>
         ) : (
-          <div className="categories-grid">
+          <div className="categories-list">
             {categories.map(category => (
               <div key={category.id} className="category-card">
                 <div className="category-info">
