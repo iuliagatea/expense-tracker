@@ -9,10 +9,18 @@ const Expenses = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const getCurrentMonth = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  };
+
   const [filters, setFilters] = useState({
     category: '',
     date: '',
-    month: '',
+    month: getCurrentMonth(),
     expenseType: ''
   });
 

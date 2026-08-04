@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -130,6 +131,13 @@ public class ExpenseController {
     @GetMapping("/category/{category}/month")
     public ResponseEntity<List<Expense>> getExpenseByCategoryIdAndMonth(@PathVariable Long categoryId, @RequestParam String month, @CurrentUser AppUser user) {
         return ResponseEntity.ok(expenseService.getExpenseByCategoryIdAndMonth(categoryId, month, user.getId()));
+    }
+
+    @GetMapping("/month")
+    public ResponseEntity<List<Expense>> getExpenseByMonth(@RequestParam String month, @CurrentUser AppUser user) {
+        String filterMonth = month != null ? month : YearMonth.now().toString();
+
+        return ResponseEntity.ok(expenseService.getExpenseByMonth(filterMonth, user.getId()));
     }
 
     @GetMapping("expense_type/{type}")

@@ -37,6 +37,12 @@ public class ExpenseServiceImpl implements ExpenseService{
     }
 
     @Override
+    public List<Expense> getExpenseByMonth(String month, Long userId) {
+        return expenseRepository.findByUserIdOrderByDateDesc(userId).stream()
+                .filter(expense -> expense.getDate().startsWith(month)).toList();
+    }
+
+    @Override
     public List<Category> getAllExpenseCategories(Long userId) {
         return expenseRepository.findByUserIdOrderByDateDesc(userId)
                 .stream()

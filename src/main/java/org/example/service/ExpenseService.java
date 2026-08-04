@@ -12,6 +12,7 @@ public interface ExpenseService {
     List<Expense> getExpenseByDate(String date, Long userId);
     List<Expense> getExpenseByCategoryIdAndMonth(
             Long categoryId, String month, Long userId);
+    List<Expense> getExpenseByMonth(String month, Long userId);
     List<Category> getAllExpenseCategories(Long userId);
     Optional<Expense> getExpenseById(Long id, Long userId);
 
