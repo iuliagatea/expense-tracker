@@ -57,6 +57,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+    const changePassword = async (username, currentPassword, newPassword) => {
+      try {
+        const response = await authService.changePassword({ username, currentPassword, newPassword });
+        console.log('Change password response:', response);
+        if (response.ok) {
+          return { success: true };
+        }
+        return { success: false, message: response.message };
+      } catch (error) {
+        return { success: false, message: error.response?.data?.message || 'Change password failed' };
+      }
+    };
+
   const logout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);

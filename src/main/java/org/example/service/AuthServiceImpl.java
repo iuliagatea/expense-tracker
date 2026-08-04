@@ -11,12 +11,10 @@ import org.example.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 @Service
 public class AuthServiceImpl implements AuthService{
@@ -39,7 +37,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public AuthResponseDTO registerUser(AppUserDTO appUserDTO) {
-        if(userService.findByUsename(appUserDTO.getUsername()) != null) {
+        if(userService.findByUsername(appUserDTO.getUsername()) != null) {
             return new AuthResponseDTO(null, "error: Username is already taken");
         }
 
@@ -75,7 +73,7 @@ public class AuthServiceImpl implements AuthService{
                             authDTO.getPassword()
                     ));
 
-            AppUser appUser = userService.findByUsename(authDTO.getUsername());
+            AppUser appUser = userService.findByUsername(authDTO.getUsername());
             currentUser.setCurrentUser(appUser);
             final String token = jwtUtil.generateToken(authDTO.getUsername());
             return new AuthResponseDTO(token, "Success");
