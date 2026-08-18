@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Auth.css';
 
 const Login = () => {
+  const { state } = useLocation();
+  const { message } = state;
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState(message || '');
   const [loading, setLoading] = useState(false);
-
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -31,7 +32,6 @@ const Login = () => {
       if (result.success) {
         navigate('/dashboard');
       } else {
-
         setError(result.message);
       }
     } catch (err) {
@@ -60,7 +60,7 @@ const Login = () => {
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
               value={formData.email}

@@ -37,7 +37,7 @@ const Signup = () => {
     try {
       const result = await signup(formData.fullName, formData.email, formData.password);
       if (result.success) {
-        navigate('/dashboard');
+        navigate('/login', { state: { message: result.message } });
       } else {
         setError(result.message);
       }
@@ -79,7 +79,7 @@ const Signup = () => {
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
               value={formData.email}

@@ -3,6 +3,7 @@ package org.example.controller;
 import org.example.dto.AppUserDTO;
 import org.example.dto.AuthDTO;
 import org.example.dto.AuthResponseDTO;
+import org.example.dto.ResponseDTO;
 import org.example.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,11 +22,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponseDTO> signup(
+    public ResponseEntity<ResponseDTO> signup(
             @RequestBody AppUserDTO appUserDTO) {
-        AuthResponseDTO response = authService.registerUser(appUserDTO);
-
-        if("success".equalsIgnoreCase(response.getMessage())){
+        ResponseDTO response = authService.registerUser(appUserDTO);
+        if("success".equalsIgnoreCase(response.getMessage().substring(0, 7))){
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body(response);
@@ -37,7 +37,7 @@ public class AuthController {
             @RequestBody AuthDTO authDTO) {
         AuthResponseDTO response = authService.loginUser(authDTO);
 
-        if("success".equalsIgnoreCase(response.getMessage())){
+        if("success".equalsIgnoreCase(response.getMessage().substring(0, 7))){
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body(response);

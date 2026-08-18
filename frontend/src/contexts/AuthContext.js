@@ -45,13 +45,8 @@ export const AuthProvider = ({ children }) => {
   const signup = async (fullName, email, password) => {
     try {
       const response = await authService.signup({ fullName, email, password });
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        setIsAuthenticated(true);
-        setUser({ email });
-        return { success: true };
-      }
-      return { success: false, message: response.message };
+
+      return { success: response.success, message: response.message };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Signup failed' };
     }
