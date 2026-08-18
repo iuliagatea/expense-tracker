@@ -19,10 +19,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(userRepository.findByUsername("admin").isEmpty()) {
+        if(userRepository.findByEmail("admin@admin.com").isEmpty()) {
             AppUser adminUser = new AppUser();
             adminUser.setFullName("Admin User");
-            adminUser.setUsername("admin");
+            adminUser.setEmail("admin@admin.com");
             adminUser.setPassword(passwordEncoder.encode("admin123"));
             adminUser.setRole(Role.ADMIN);
 

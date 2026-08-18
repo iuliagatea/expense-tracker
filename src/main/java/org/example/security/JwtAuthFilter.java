@@ -30,15 +30,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         // Extract the token from the Authorization header
         final String authHeader = request.getHeader("Authorization");
-        String username = null;
+        String email = null;
         String token = null;
 
         // Check if the Authorization header is present and starts with "Bearer "
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7); // Remove "Bearer " prefix to get the token
             try {
-                // Extract the username from the token
-                username = jwtUtil.extractUsername(token);
+                // Extract the email from the token
+                email = jwtUtil.extractUsername(token);
             } catch (ExpiredJwtException e) {
                 // Handle expired token exception
                 System.out.println("JWT Token has expired");
@@ -52,9 +52,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         // Validate the token and set the authentication context
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Load user details from the database
-            var userDetails = userDetailsService.loadUserByUsername(username);
+            var userDetails = userDetailsService.loadUserByUsername(email);
 
             // Validate the token
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {

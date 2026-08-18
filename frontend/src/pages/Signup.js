@@ -6,7 +6,7 @@ import './Auth.css';
 const Signup = () => {
   const [formData, setFormData] = useState({
     fullName: '',
-    username: '',
+    email: '',
     password: '',
     confirmPassword: ''
   });
@@ -35,7 +35,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const result = await signup(formData.fullName, formData.username, formData.password);
+      const result = await signup(formData.fullName, formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {
@@ -77,15 +77,15 @@ const Signup = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
               type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Choose a username"
+              placeholder="Enter a valid email address"
             />
           </div>
 

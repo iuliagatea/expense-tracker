@@ -30,7 +30,7 @@ public class UserServiceImplTest {
     public void setUp() {
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@test.com");
         testUser.setFullName("Test User");
         testUser.setPassword("encodedPassword");
         testUser.setRole(Role.USER);
@@ -46,36 +46,36 @@ public class UserServiceImplTest {
 
         // Assert
         assertThat(savedUser).isNotNull();
-        assertThat(savedUser.getUsername()).isEqualTo("testuser");
+        assertThat(savedUser.getEmail()).isEqualTo("testuser@test.com");
         assertThat(savedUser.getFullName()).isEqualTo("Test User");
         verify(userRepository, times(1)).save(testUser);
     }
 
     @Test
-    public void testFindByUsename_WithExistingUser_ShouldReturnUser() {
+    public void testFindByUsername_WithExistingUser_ShouldReturnUser() {
         // Arrange
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("testuser@test.com")).thenReturn(Optional.of(testUser));
 
         // Act
-        AppUser foundUser = userService.findByUsename("testuser");
+        AppUser foundUser = userService.findByEmail("testuser@test.com");
 
         // Assert
         assertThat(foundUser).isNotNull();
-        assertThat(foundUser.getUsername()).isEqualTo("testuser");
-        verify(userRepository, times(1)).findByUsername("testuser");
+        assertThat(foundUser.getEmail()).isEqualTo("testuser@test.com");
+        verify(userRepository, times(1)).findByEmail("testuser@test.com");
     }
 
     @Test
-    public void testFindByUsename_WithNonExistingUser_ShouldReturnNull() {
+    public void testFindByEmail_WithNonExistingUser_ShouldReturnNull() {
         // Arrange
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("nonexistent@test.com")).thenReturn(Optional.empty());
 
         // Act
-        AppUser foundUser = userService.findByUsename("nonexistent");
+        AppUser foundUser = userService.findByEmail("nonexistent@test.com");
 
         // Assert
         assertThat(foundUser).isNull();
-        verify(userRepository, times(1)).findByUsername("nonexistent");
+        verify(userRepository, times(1)).findByEmail("nonexistent@test.com");
     }
 
     @Test
@@ -92,7 +92,7 @@ public class UserServiceImplTest {
         // Arrange
         AppUser user2 = new AppUser();
         user2.setId(2L);
-        user2.setUsername("user2");
+        user2.setEmail("user2@test.com");
         user2.setFullName("User Two");
         user2.setRole(Role.USER);
 
@@ -104,8 +104,8 @@ public class UserServiceImplTest {
         AppUser saved2 = userService.saveUser(user2);
 
         // Assert
-        assertThat(saved1.getUsername()).isEqualTo("testuser");
-        assertThat(saved2.getUsername()).isEqualTo("user2");
+        assertThat(saved1.getEmail()).isEqualTo("testuser@test.com");
+        assertThat(saved2.getEmail()).isEqualTo("user2@test.com");
         verify(userRepository, times(2)).save(any(AppUser.class));
     }
 }

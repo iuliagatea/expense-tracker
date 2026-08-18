@@ -83,7 +83,7 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_WithNewUser_ShouldReturnSuccessResponse() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
+        when(userService.findByUsername(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
         when(categoryService.addCategory(any(Category.class))).thenReturn(testCategory);
@@ -105,7 +105,7 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_WithExistingUsername_ShouldReturnErrorResponse() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(testUser);
+        when(userService.findByUsername(username)).thenReturn(testUser);
 
         // Act
         AuthResponseDTO response = authService.registerUser(testUserDTO);
@@ -156,7 +156,7 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_ShouldSetUserRoleToUSER() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
+        when(userService.findByUsername(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
 
         AppUser savedUser = new AppUser();
@@ -195,7 +195,7 @@ public class AuthServiceImplTest {
     @Test
     public void testRegisterUser_ShouldEncodePassword() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
+        when(userService.findByUsername(username)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
         when(authenticationManager.authenticate(any()))
