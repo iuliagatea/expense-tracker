@@ -1,5 +1,6 @@
 package org.example.service;
 
+import lombok.Synchronized;
 import org.example.model.Category;
 import org.example.model.Expense;
 import org.example.repository.ExpenseRepository;
@@ -24,21 +25,21 @@ public class ExpenseServiceImpl implements ExpenseService{
 
     @Override
     public List<Expense> getExpenseByDate(String date, Long userId) {
-        return expenseRepository.findByUserIdOrderByDateDesc(userId).stream()
+        return expenseRepository.findByUserIdOrderByDateDesc(userId).parallelStream()
                 .filter(expense -> expense.getDate().equalsIgnoreCase(date))
                 .toList();
     }
 
     @Override
     public List<Expense> getExpenseByCategoryIdAndMonth(Long categoryId, String month, Long userId) {
-        return expenseRepository.findByUserIdOrderByDateDesc(userId).stream()
+        return expenseRepository.findByUserIdOrderByDateDesc(userId).parallelStream()
                 .filter(expense -> expense.getCategory().getId().equals(categoryId) &&
                         expense.getDate().startsWith(month)).toList();
     }
 
     @Override
     public List<Expense> getExpenseByMonth(String month, Long userId) {
-        return expenseRepository.findByUserIdOrderByDateDesc(userId).stream()
+        return expenseRepository.findByUserIdOrderByDateDesc(userId).parallelStream()
                 .filter(expense -> expense.getDate().startsWith(month)).toList();
     }
 

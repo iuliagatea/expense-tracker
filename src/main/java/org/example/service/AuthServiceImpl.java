@@ -73,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
         token.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
         confirmationTokenRepository.save(token);
 
+        // Email is sent asynchronously in background thread
         emailService.sendConfirmationEmail(appUser, confirmationTokenValue);
 
         return new ResponseDTO(true, "Success: registration complete. Please check you email to confirm your account.");
@@ -138,6 +139,7 @@ public class AuthServiceImpl implements AuthService {
         resetToken.setExpiresAt(Instant.now().plus(RESET_TOKEN_EXPIRY_MINUTES, ChronoUnit.MINUTES));
         confirmationTokenRepository.save(resetToken);
 
+        // Email is sent asynchronously in background thread
         emailService.sendPasswordResetEmail(appUser, rawToken);
 
         return new ResponseDTO(true, "If an account exists for that email, a password reset link has been sent.");

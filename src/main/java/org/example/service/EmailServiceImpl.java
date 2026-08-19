@@ -8,10 +8,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -31,7 +33,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendConfirmationEmail(AppUser user, String token) {
+    @Async("taskExecutor")
+    public CompletableFuture<Void> sendConfirmationEmail(AppUser user, String token) {
         String link = appUrl + "/auth/confirm?token=" + token;
         if (mailSender != null) {
             try {
@@ -50,17 +53,19 @@ public class EmailServiceImpl implements EmailService {
                 helper.setText(html, true);
                 mailSender.send(message);
                 log.info("Sent confirmation email to {}", user.getEmail());
-                return;
+                return CompletableFuture.completedFuture(null);
             } catch (Exception e) {
                 log.error("Failed to send confirmation email, falling back to console. Error: {}", e.getMessage());
             }
         }
 
         System.out.println("[EmailService] Confirmation link for " + user.getEmail() + ": " + link);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public void sendPasswordResetEmail(AppUser user, String token) {
+    @Async("taskExecutor")
+    public CompletableFuture<Void> sendPasswordResetEmail(AppUser user, String token) {
         String encodedEmail = URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8);
         String link = appUrl + "/reset-password?token=" + token + "&email=" + encodedEmail;
 
@@ -82,12 +87,13 @@ public class EmailServiceImpl implements EmailService {
                 helper.setText(html, true);
                 mailSender.send(message);
                 log.info("Sent password reset email to {}", user.getEmail());
-                return;
+                return CompletableFuture.completedFuture(null);
             } catch (Exception e) {
                 log.error("Failed to send password reset email, falling back to console. Error: {}", e.getMessage());
             }
         }
 
         System.out.println("[EmailService] Password reset link for " + user.getEmail() + ": " + link);
+        return CompletableFuture.completedFuture(null);
     }
 }

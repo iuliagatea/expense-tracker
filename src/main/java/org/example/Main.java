@@ -10,6 +10,7 @@ import java.util.List;
 @SpringBootApplication
 @EnableScheduling
 public class Main implements CommandLineRunner {
+    // AsyncConfig is auto-configured via @EnableAsync in AsyncConfig class
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
     }

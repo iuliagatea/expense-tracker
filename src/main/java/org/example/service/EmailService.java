@@ -2,7 +2,9 @@ package org.example.service;
 
 import org.example.model.AppUser;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface EmailService {
-    void sendConfirmationEmail(AppUser user, String token);
-    void sendPasswordResetEmail(AppUser user, String token);
+    CompletableFuture<Void> sendConfirmationEmail(AppUser user, String token);
+    CompletableFuture<Void> sendPasswordResetEmail(AppUser user, String token);
 }

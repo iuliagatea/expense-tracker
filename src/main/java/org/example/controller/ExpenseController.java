@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Synchronized;
 import org.example.annotation.CurrentUser;
 import org.example.dto.ExpenseDTO;
 import org.example.model.AppUser;
