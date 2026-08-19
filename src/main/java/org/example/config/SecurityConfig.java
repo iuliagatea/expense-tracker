@@ -41,9 +41,9 @@ public class SecurityConfig {
                 // Configure endpoint security
                 .authorizeHttpRequests(authz ->
                         authz
-                                .requestMatchers("/signup", "/login").permitAll() // Allow access to signup and login endpoints
-                                .requestMatchers("/admin/**").hasRole("ADMIN") // Only ADMIN role can access /admin/**
-                                .anyRequest().permitAll() // All other endpoints require USER role
+                                .requestMatchers("/signup", "/login", "/forgot-password", "/reset-password", "/auth/**").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->

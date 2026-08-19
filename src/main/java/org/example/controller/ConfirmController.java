@@ -10,23 +10,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/auth")
 public class ConfirmController {
-
-    @Value("${app.url:http://localhost:3000}")
-    private String appUrl;
-
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final UserService userService;
     private final CategoryService categoryService;
@@ -39,25 +36,21 @@ public class ConfirmController {
 
     @GetMapping("/confirm")
     @Transactional
-    public ResponseEntity<Void> confirm(@RequestParam("token") String token) {
-        System.out.println("Confirming token: " + token);
-        Optional<ConfirmationToken> opt = confirmationTokenRepository.findByToken(token);
+    public ResponseEntity<String> confirm(@RequestParam("token") String token) {
+        String hashedToken = hashToken(token);
+        Optional<ConfirmationToken> opt = confirmationTokenRepository.findByToken(hashedToken);
         if (opt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(appUrl + "/login?confirmed=false&error=invalid"))
-                    .build();
+            return ResponseEntity.badRequest().body("Invalid or missing token");
+
         }
         ConfirmationToken ct = opt.get();
         if (ct.getExpiresAt() != null && ct.getExpiresAt().isBefore(Instant.now())) {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(appUrl + "/login?confirmed=false&error=expired"))
-                    .build();
+            return ResponseEntity.badRequest().body("Token expired");
         }
         AppUser user = ct.getUser();
         user.setConfirmed(true);
         userService.saveUser(user);
 
-        // create default categories
         Arrays.asList("Food", "Transport", "Travel", "Household", "Health",
                 "Social life", "Gift", "Apparel", "Education", "Beauty", "Other").forEach(categoryName -> {
             Category category = new Category();
@@ -65,10 +58,23 @@ public class ConfirmController {
             category.setUser(user);
             categoryService.addCategory(category);
         });
+        System.out.println("User confirmed: " + user.getEmail());
+        confirmationTokenRepository.deleteByToken(hashedToken);
+        return ResponseEntity.ok("Email confirmed successfully");
 
-        confirmationTokenRepository.deleteByToken(token);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(appUrl + "/login?confirmed=true"))
-                .build();
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(token.trim().getBytes(StandardCharsets.UTF_8));
+            StringBuilder builder = new StringBuilder();
+            for (byte item : bytes) {
+                builder.append(String.format("%02x", item));
+            }
+            return builder.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to hash confirmation token.", e);
+        }
     }
 }

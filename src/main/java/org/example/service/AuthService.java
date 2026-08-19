@@ -8,4 +8,6 @@ import org.example.dto.ResponseDTO;
 public interface AuthService {
     ResponseDTO registerUser(AppUserDTO appUserDTO);
     AuthResponseDTO loginUser(AuthDTO authDTO);
+    ResponseDTO requestPasswordReset(String email);
+    ResponseDTO resetPassword(String email, String token, String newPassword);
 }
