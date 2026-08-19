@@ -17,7 +17,7 @@ public class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
 
-    @Value("${app.url:http://localhost:3000}")
+    @Value("${app.url:http://localhost:8080}")
     private String appUrl;
 
     @Value("${spring.mail.username:no-reply@example.com}")

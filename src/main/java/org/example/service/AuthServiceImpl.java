@@ -33,9 +33,6 @@ public class AuthServiceImpl implements AuthService{
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final EmailService emailService;
 
-    @Value("${app.url:http://localhost:8080}")
-    private String appUrl;
-
     public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtUtil jwtUtil, CurrentUser currentUser, ConfirmationTokenRepository confirmationTokenRepository, EmailService emailService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -49,7 +46,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public ResponseDTO registerUser(AppUserDTO appUserDTO) {
         if(userService.findByEmail(appUserDTO.getEmail()) != null) {
-            return new ResponseDTO(false, "error: Email is already taken");
+            return new ResponseDTO(false, "Error: Email is already taken.");
         }
 
         AppUser appUser = new AppUser();
@@ -74,7 +71,7 @@ public class AuthServiceImpl implements AuthService{
         // send email (console-based fallback)
         emailService.sendConfirmationEmail(appUser, token.getToken());
 
-        return new ResponseDTO(true, "Success: registration complete. Please confirm your email.");
+        return new ResponseDTO(true, "Success: registration complete. Please check you email to confirm your account.");
     }
 
     @Override
@@ -83,19 +80,19 @@ public class AuthServiceImpl implements AuthService{
             String email = authDTO.getEmail().toLowerCase().trim();
 
             if (email.isBlank()) {
-                return new AuthResponseDTO(null, "Error: invalid email or password");
+                return new AuthResponseDTO(null, "Error: invalid email or password.");
             }
 
             if (!isValidEmail(email)) {
-                return new AuthResponseDTO(null, "Error: invalid email format");
+                return new AuthResponseDTO(null, "Error: invalid email format.");
             }
             AppUser appUser = userService.findByEmail(email);
             if (appUser == null) {
-                return new AuthResponseDTO(null, "Error: invalid email or password");
+                return new AuthResponseDTO(null, "Error: invalid email or password.");
             }
 
             if (appUser.getConfirmed() == null || !appUser.getConfirmed()) {
-                return new AuthResponseDTO(null, "Error: email not confirmed");
+                return new AuthResponseDTO(null, "Error: account not confirmed.");
             }
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -108,7 +105,7 @@ public class AuthServiceImpl implements AuthService{
             currentUser.setCurrentUser(appUser);
             return new AuthResponseDTO(token, "Success");
         } catch (BadCredentialsException e) {
-            return new AuthResponseDTO(null, "Error: invalid email or password");
+            return new AuthResponseDTO(null, "Error: invalid email or password.");
         }
     }
 

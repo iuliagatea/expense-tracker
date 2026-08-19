@@ -4,16 +4,21 @@ import { useAuth } from '../contexts/AuthContext';
 import './Auth.css';
 
 const Login = () => {
-  const { state } = useLocation();
-  const { message } = state;
+  const location = useLocation();
+  const { state } = location;
+  const { message } = state || {};
+  const queryParams = new URLSearchParams(location.search);
+  const confirmed = queryParams.get('confirmed');
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState(message || '');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const successMessage = confirmed === 'true' ? 'Email confirmed — please sign in.' : (message || '');
 
   const handleChange = (e) => {
     setFormData({
@@ -49,6 +54,12 @@ const Login = () => {
               <img src="/expense_tracker_logo.svg" alt="Expense Tracker Logo" />
             </div>
         <h2>Login</h2>
+
+        {successMessage && (
+          <div className="alert alert-success">
+            {successMessage}
+          </div>
+        )}
 
         {error && (
           <div className="alert alert-error">
