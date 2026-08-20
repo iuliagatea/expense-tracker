@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface UserService {
     AppUser saveUser(AppUser user);
-    AppUser findByUsername(String username);
+    AppUser findByEmail(String email);
     ResponseDTO changePassword(AppUser user, PasswordChangeDTO passwordChangeDTO);
     Optional<AppUser> findUserById(Long id);
 }

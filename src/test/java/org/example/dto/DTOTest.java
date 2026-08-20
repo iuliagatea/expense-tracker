@@ -22,7 +22,7 @@ public class DTOTest {
     public void testAppUserDTOConstruction_ShouldHaveDefaultValues() {
         // Assert
         assertThat(appUserDTO.getFullName()).isNull();
-        assertThat(appUserDTO.getUsername()).isNull();
+        assertThat(appUserDTO.getEmail()).isNull();
         assertThat(appUserDTO.getPassword()).isNull();
     }
 
@@ -39,15 +39,15 @@ public class DTOTest {
     }
 
     @Test
-    public void testAppUserDTOSetAndGetUsername_ShouldWorkCorrectly() {
+    public void testAppUserDTOSetAndGetEmail_ShouldWorkCorrectly() {
         // Arrange
-        String username = "johndoe";
+        String email = "john@example.com";
 
         // Act
-        appUserDTO.setUsername(username);
+        appUserDTO.setEmail(email);
 
         // Assert
-        assertThat(appUserDTO.getUsername()).isEqualTo(username);
+        assertThat(appUserDTO.getEmail()).isEqualTo(email);
     }
 
     @Test
@@ -66,17 +66,17 @@ public class DTOTest {
     public void testAppUserDTOSetAllFields_ShouldWorkCorrectly() {
         // Arrange
         String fullName = "Jane Doe";
-        String username = "janedoe";
+        String email = "jane@example.com";
         String password = "securePass456";
 
         // Act
         appUserDTO.setFullName(fullName);
-        appUserDTO.setUsername(username);
+        appUserDTO.setEmail(email);
         appUserDTO.setPassword(password);
 
         // Assert
         assertThat(appUserDTO.getFullName()).isEqualTo(fullName);
-        assertThat(appUserDTO.getUsername()).isEqualTo(username);
+        assertThat(appUserDTO.getEmail()).isEqualTo(email);
         assertThat(appUserDTO.getPassword()).isEqualTo(password);
     }
 
@@ -84,20 +84,20 @@ public class DTOTest {
     @Test
     public void testAuthDTOConstruction_ShouldHaveDefaultValues() {
         // Assert
-        assertThat(authDTO.getUsername()).isNull();
+        assertThat(authDTO.getEmail()).isNull();
         assertThat(authDTO.getPassword()).isNull();
     }
 
     @Test
-    public void testAuthDTOSetAndGetUsername_ShouldWorkCorrectly() {
+    public void testAuthDTOSetAndGetEmail_ShouldWorkCorrectly() {
         // Arrange
-        String username = "testuser";
+        String email = "test@example.com";
 
         // Act
-        authDTO.setUsername(username);
+        authDTO.setEmail(email);
 
         // Assert
-        assertThat(authDTO.getUsername()).isEqualTo(username);
+        assertThat(authDTO.getEmail()).isEqualTo(email);
     }
 
     @Test
@@ -115,15 +115,15 @@ public class DTOTest {
     @Test
     public void testAuthDTOSetAllFields_ShouldWorkCorrectly() {
         // Arrange
-        String username = "user123";
+        String email = "user123@example.com";
         String password = "pass456";
 
         // Act
-        authDTO.setUsername(username);
+        authDTO.setEmail(email);
         authDTO.setPassword(password);
 
         // Assert
-        assertThat(authDTO.getUsername()).isEqualTo(username);
+        assertThat(authDTO.getEmail()).isEqualTo(email);
         assertThat(authDTO.getPassword()).isEqualTo(password);
     }
 

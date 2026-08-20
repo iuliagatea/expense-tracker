@@ -3,7 +3,6 @@ package org.example.dto;
 import lombok.Data;
 
 @Data
-public class AuthDTO {
+public class ForgotPasswordDTO {
     private String email;
-    private String password;
 }

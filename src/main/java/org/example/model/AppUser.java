@@ -16,7 +16,7 @@ public class AppUser {
     private String fullName;
 
     @Column(unique = true)
-    private String username;
+    private String email;
     private String password;
 
     @OneToMany(mappedBy = "user",
@@ -31,4 +31,7 @@ public class AppUser {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<Category> categories;
+
+    private Boolean active;
+    private Boolean confirmed;
 }

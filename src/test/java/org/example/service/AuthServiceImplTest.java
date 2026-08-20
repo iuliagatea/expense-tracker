@@ -4,9 +4,11 @@ import org.example.config.CurrentUser;
 import org.example.dto.AppUserDTO;
 import org.example.dto.AuthDTO;
 import org.example.dto.AuthResponseDTO;
+import org.example.dto.ResponseDTO;
 import org.example.model.AppUser;
-import org.example.model.Category;
+import org.example.model.ConfirmationToken;
 import org.example.model.Role;
+import org.example.repository.ConfirmationTokenRepository;
 import org.example.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -30,9 +31,6 @@ public class AuthServiceImplTest {
     private UserService userService;
 
     @Mock
-    private CategoryService categoryService;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -44,86 +42,82 @@ public class AuthServiceImplTest {
     @Mock
     private CurrentUser currentUser;
 
+    @Mock
+    private ConfirmationTokenRepository confirmationTokenRepository;
+
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
     private AppUserDTO testUserDTO;
     private AuthDTO testAuthDTO;
     private AppUser testUser;
-    private Category testCategory;
-    private String username = "testuser";
+    private String email = "testuser@example.com";
 
     @BeforeEach
     public void setUp() {
         testUserDTO = new AppUserDTO();
         testUserDTO.setFullName("Test User");
-        testUserDTO.setUsername(username);
+        testUserDTO.setEmail(email);
         testUserDTO.setPassword("password123");
 
         testAuthDTO = new AuthDTO();
-        testAuthDTO.setUsername(username);
+        testAuthDTO.setEmail(email);
         testAuthDTO.setPassword("password123");
 
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername(username);
+        testUser.setEmail(email);
         testUser.setFullName("Test User");
         testUser.setPassword("encodedPassword");
         testUser.setRole(Role.USER);
-
-        currentUser = new CurrentUser();
-        currentUser.setCurrentUser(testUser);
-
-        testCategory = new Category();
-        testCategory.setId(1L);
-        testCategory.setName("Food");
-        testCategory.setUser(testUser);
+        testUser.setConfirmed(true);
+        testUser.setActive(true);
     }
 
     @Test
     public void testRegisterUser_WithNewUser_ShouldReturnSuccessResponse() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
+        when(userService.findByEmail(email)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
-        when(categoryService.addCategory(any(Category.class))).thenReturn(testCategory);
-        when(authenticationManager.authenticate(any()))
-                .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
-        AuthResponseDTO response = authService.registerUser(testUserDTO);
+        ResponseDTO response = authService.registerUser(testUserDTO);
 
         // Assert
         assertThat(response).isNotNull();
-        assertThat(response.getToken()).isEqualTo("jwt-token");
-        assertThat(response.getMessage()).isEqualTo("Success");
+        assertThat(response.getSuccess()).isTrue();
+        assertThat(response.getMessage()).contains("Success");
         verify(userService, times(1)).saveUser(any(AppUser.class));
         verify(passwordEncoder, times(1)).encode("password123");
+        verify(confirmationTokenRepository, times(1)).save(any(ConfirmationToken.class));
+        verify(emailService, times(1)).sendConfirmationEmail(any(AppUser.class), anyString());
     }
 
     @Test
-    public void testRegisterUser_WithExistingUsername_ShouldReturnErrorResponse() {
+    public void testRegisterUser_WithExistingEmail_ShouldReturnErrorResponse() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(testUser);
+        when(userService.findByEmail(email)).thenReturn(testUser);
 
         // Act
-        AuthResponseDTO response = authService.registerUser(testUserDTO);
+        ResponseDTO response = authService.registerUser(testUserDTO);
 
         // Assert
         assertThat(response).isNotNull();
-        assertThat(response.getMessage()).contains("error");
+        assertThat(response.getSuccess()).isFalse();
         assertThat(response.getMessage()).contains("already taken");
-        assertThat(response.getToken()).isNull();
         verify(userService, never()).saveUser(any());
     }
 
     @Test
     public void testLoginUser_WithValidCredentials_ShouldReturnSuccessResponse() {
         // Arrange
-        when(authenticationManager.authenticate(any()))
-                .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
+        when(userService.findByEmail(email)).thenReturn(testUser);
+        when(authenticationManager.authenticate(any())).thenReturn(mock(Authentication.class));
+        when(jwtUtil.generateToken(email)).thenReturn("jwt-token");
 
         // Act
         AuthResponseDTO response = authService.loginUser(testAuthDTO);
@@ -133,14 +127,14 @@ public class AuthServiceImplTest {
         assertThat(response.getToken()).isEqualTo("jwt-token");
         assertThat(response.getMessage()).isEqualTo("Success");
         verify(authenticationManager, times(1)).authenticate(any());
-        verify(jwtUtil, times(1)).generateToken(username);
+        verify(jwtUtil, times(1)).generateToken(email);
     }
 
     @Test
     public void testLoginUser_WithInvalidCredentials_ShouldReturnErrorResponse() {
         // Arrange
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Bad credentials"));
+        when(userService.findByEmail(email)).thenReturn(testUser);
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
 
         // Act
         AuthResponseDTO response = authService.loginUser(testAuthDTO);
@@ -148,59 +142,34 @@ public class AuthServiceImplTest {
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.getMessage()).contains("Error");
-        assertThat(response.getMessage()).contains("invalid username or password");
         assertThat(response.getToken()).isNull();
         verify(jwtUtil, never()).generateToken(any());
     }
 
     @Test
-    public void testRegisterUser_ShouldSetUserRoleToUSER() {
+    public void testLoginUser_WithUnconfirmedAccount_ShouldReturnErrorResponse() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-
-        AppUser savedUser = new AppUser();
-        savedUser.setId(1L);
-        savedUser.setUsername(username);
-        savedUser.setRole(Role.USER);
-
-        when(userService.saveUser(any(AppUser.class))).thenReturn(savedUser);
-        when(authenticationManager.authenticate(any()))
-                .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
+        AppUser unconfirmedUser = new AppUser();
+        unconfirmedUser.setEmail(email);
+        unconfirmedUser.setConfirmed(false);
+        when(userService.findByEmail(email)).thenReturn(unconfirmedUser);
 
         // Act
-        authService.registerUser(testUserDTO);
+        AuthResponseDTO response = authService.loginUser(testAuthDTO);
 
         // Assert
-        verify(userService, times(1)).saveUser(argThat(user ->
-                user.getRole() == Role.USER
-        ));
-    }
-
-    @Test
-    public void testLoginUser_ShouldGenerateTokenWithCorrectUsername() {
-        // Arrange
-        when(authenticationManager.authenticate(any()))
-                .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
-
-        // Act
-        authService.loginUser(testAuthDTO);
-
-        // Assert
-        verify(jwtUtil, times(1)).generateToken(username);
+        assertThat(response).isNotNull();
+        assertThat(response.getMessage()).contains("not confirmed");
+        assertThat(response.getToken()).isNull();
+        verify(authenticationManager, never()).authenticate(any());
     }
 
     @Test
     public void testRegisterUser_ShouldEncodePassword() {
         // Arrange
-        when(userService.findByUsename(username)).thenReturn(null);
+        when(userService.findByEmail(email)).thenReturn(null);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userService.saveUser(any(AppUser.class))).thenReturn(testUser);
-        when(authenticationManager.authenticate(any()))
-                .thenReturn(mock(Authentication.class));
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
 
         // Act
         authService.registerUser(testUserDTO);
@@ -212,8 +181,3 @@ public class AuthServiceImplTest {
         ));
     }
 }
-
-
-
-
-

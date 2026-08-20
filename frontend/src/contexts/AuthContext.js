@@ -26,14 +26,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
-      const response = await authService.login({ username, password });
+      const response = await authService.login({ email, password });
       console.log('Login response:', response);
       if (response.token) {
         localStorage.setItem('token', response.token);
         setIsAuthenticated(true);
-        setUser({ username });
+        setUser({ email });
         return { success: true };
       }
       return { success: false, message: response.message };
@@ -42,24 +42,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (fullName, username, password) => {
+  const signup = async (fullName, email, password) => {
     try {
-      const response = await authService.signup({ fullName, username, password });
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        setIsAuthenticated(true);
-        setUser({ username });
-        return { success: true };
-      }
-      return { success: false, message: response.message };
+      const response = await authService.signup({ fullName, email, password });
+
+      return { success: response.success, message: response.message };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Signup failed' };
     }
   };
 
-    const changePassword = async (username, currentPassword, newPassword) => {
+    const changePassword = async (email, currentPassword, newPassword) => {
       try {
-        const response = await authService.changePassword({ username, currentPassword, newPassword });
+        const response = await authService.changePassword({ email, currentPassword, newPassword });
         console.log('Change password response:', response);
         if (response.ok) {
           return { success: true };
@@ -82,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     signup,
+    changePassword,
     logout
   };
 

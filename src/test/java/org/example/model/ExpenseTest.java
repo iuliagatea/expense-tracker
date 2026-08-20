@@ -16,7 +16,7 @@ public class ExpenseTest {
         expense = new Expense();
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
         testCategory = new Category();
         testCategory.setId(1L);
         testCategory.setName("Food");
@@ -125,7 +125,7 @@ public class ExpenseTest {
         // Assert
         assertThat(expense.getUser()).isNotNull();
         assertThat(expense.getUser().getId()).isEqualTo(1L);
-        assertThat(expense.getUser().getUsername()).isEqualTo("testuser");
+        assertThat(expense.getUser().getEmail()).isEqualTo("testuser@example.com");
     }
 
     @Test

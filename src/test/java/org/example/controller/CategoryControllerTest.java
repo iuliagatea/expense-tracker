@@ -48,7 +48,7 @@ public class CategoryControllerTest {
     public void setUp() {
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
         testUser.setRole(Role.USER);
 
         category = new Category();

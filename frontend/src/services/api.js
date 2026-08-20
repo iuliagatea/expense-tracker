@@ -50,6 +50,21 @@ export const authService = {
     return response.data;
   },
 
+  confirmEmail: async (token) => {
+    const response = await api.get(`/auth/confirm?token=${token}`);
+    return response.data;
+  },
+
+  requestPasswordReset: async (email) => {
+    const response = await api.post('/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (payload) => {
+    const response = await api.post('/reset-password', payload);
+    return response.data;
+  },
+
   changePassword: async (passwordData) => {
     const response = await api.post('/users/password', passwordData);
     return response.data;

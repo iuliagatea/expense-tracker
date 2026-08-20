@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Auth.css';
 
 const Login = () => {
+  const location = useLocation();
+  const { state } = location;
+  const { message } = state || {};
+  const queryParams = new URLSearchParams(location.search);
+  const confirmed = queryParams.get('confirmed');
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const successMessage = confirmed === 'true' ? 'Email confirmed — please sign in.' : (message || '');
 
   const handleChange = (e) => {
     setFormData({
@@ -27,11 +33,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const result = await login(formData.username, formData.password);
+      const result = await login(formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {
-
         setError(result.message);
       }
     } catch (err) {
@@ -50,6 +55,12 @@ const Login = () => {
             </div>
         <h2>Login</h2>
 
+        {successMessage && (
+          <div className="alert alert-success">
+            {successMessage}
+          </div>
+        )}
+
         {error && (
           <div className="alert alert-error">
             {error}
@@ -58,15 +69,15 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your username"
+              placeholder="Enter your email"
             />
           </div>
 
@@ -100,6 +111,11 @@ const Login = () => {
         </form>
 
         <div className="auth-links">
+          <p>
+            <Link to="/forgot-password" className="auth-link">
+              Forgot password?
+            </Link>
+          </p>
           <p>
             Don't have an account?{' '}
             <Link to="/signup" className="auth-link">
