@@ -3,6 +3,7 @@ package org.example.controller;
 import org.example.dto.AppUserDTO;
 import org.example.dto.AuthDTO;
 import org.example.dto.AuthResponseDTO;
+import org.example.dto.ResponseDTO;
 import org.example.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,11 +35,11 @@ public class AuthControllerTest {
     public void setUp() {
         testUserDTO = new AppUserDTO();
         testUserDTO.setFullName("Test User");
-        testUserDTO.setUsername("testuser");
+        testUserDTO.setEmail("testuser@example.com");
         testUserDTO.setPassword("password123");
 
         testAuthDTO = new AuthDTO();
-        testAuthDTO.setUsername("testuser");
+        testAuthDTO.setEmail("testuser@example.com");
         testAuthDTO.setPassword("password123");
 
         successResponse = new AuthResponseDTO("jwt-token", "success");
@@ -48,32 +49,31 @@ public class AuthControllerTest {
     @Test
     public void testSignup_WithNewUser_ShouldReturnOkResponse() {
         // Arrange
-        when(authService.registerUser(testUserDTO)).thenReturn(successResponse);
+        ResponseDTO successResp = new ResponseDTO(true, "success");
+        when(authService.registerUser(testUserDTO)).thenReturn(successResp);
 
         // Act
-        ResponseEntity<AuthResponseDTO> response = authController.signup(testUserDTO);
+        ResponseEntity<ResponseDTO> response = authController.signup(testUserDTO);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getToken()).isEqualTo("jwt-token");
         assertThat(response.getBody().getMessage()).isEqualTo("success");
         verify(authService, times(1)).registerUser(testUserDTO);
     }
 
     @Test
-    public void testSignup_WithExistingUsername_ShouldReturnBadRequest() {
+    public void testSignup_WithExistingEmail_ShouldReturnBadRequest() {
         // Arrange
-        AuthResponseDTO errorResp = new AuthResponseDTO(null, "error: Username is already taken");
+        ResponseDTO errorResp = new ResponseDTO(false, "error: Email is already taken");
         when(authService.registerUser(testUserDTO)).thenReturn(errorResp);
 
         // Act
-        ResponseEntity<AuthResponseDTO> response = authController.signup(testUserDTO);
+        ResponseEntity<ResponseDTO> response = authController.signup(testUserDTO);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getToken()).isNull();
         assertThat(response.getBody().getMessage()).contains("error");
         verify(authService, times(1)).registerUser(testUserDTO);
     }
@@ -111,16 +111,17 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void testSignup_ShouldReturnTokenInSuccessResponse() {
+    public void testSignup_ShouldReturnMessageInResponse() {
         // Arrange
-        when(authService.registerUser(testUserDTO)).thenReturn(successResponse);
+        ResponseDTO successResp = new ResponseDTO(true, "success");
+        when(authService.registerUser(testUserDTO)).thenReturn(successResp);
 
         // Act
-        ResponseEntity<AuthResponseDTO> response = authController.signup(testUserDTO);
+        ResponseEntity<ResponseDTO> response = authController.signup(testUserDTO);
 
         // Assert
-        assertThat(response.getBody().getToken()).isNotNull();
-        assertThat(response.getBody().getToken()).isEqualTo("jwt-token");
+        assertThat(response.getBody().getMessage()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("success");
     }
 
     @Test
@@ -133,7 +134,7 @@ public class AuthControllerTest {
 
         // Assert
         verify(authService, times(1)).loginUser(argThat(auth ->
-                auth.getUsername().equals("testuser") &&
+                auth.getEmail().equals("testuser@example.com") &&
                 auth.getPassword().equals("password123")
         ));
     }
@@ -141,14 +142,15 @@ public class AuthControllerTest {
     @Test
     public void testSignup_ShouldPassCorrectUserDTOToService() {
         // Arrange
-        when(authService.registerUser(any(AppUserDTO.class))).thenReturn(successResponse);
+        ResponseDTO successResp = new ResponseDTO(true, "success");
+        when(authService.registerUser(any(AppUserDTO.class))).thenReturn(successResp);
 
         // Act
         authController.signup(testUserDTO);
 
         // Assert
         verify(authService, times(1)).registerUser(argThat(user ->
-                user.getUsername().equals("testuser") &&
+                user.getEmail().equals("testuser@example.com") &&
                 user.getFullName().equals("Test User") &&
                 user.getPassword().equals("password123")
         ));
@@ -183,11 +185,11 @@ public class AuthControllerTest {
     @Test
     public void testSignup_WithSuccessMessage_ShouldReturnOk() {
         // Arrange
-        AuthResponseDTO response = new AuthResponseDTO("token", "success");
+        ResponseDTO response = new ResponseDTO(true, "success");
         when(authService.registerUser(testUserDTO)).thenReturn(response);
 
         // Act
-        ResponseEntity<AuthResponseDTO> result = authController.signup(testUserDTO);
+        ResponseEntity<ResponseDTO> result = authController.signup(testUserDTO);
 
         // Assert
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -196,11 +198,11 @@ public class AuthControllerTest {
     @Test
     public void testSignup_WithErrorMessage_ShouldReturnBadRequest() {
         // Arrange
-        AuthResponseDTO response = new AuthResponseDTO(null, "error: Username is already taken");
+        ResponseDTO response = new ResponseDTO(false, "error: Email is already taken");
         when(authService.registerUser(testUserDTO)).thenReturn(response);
 
         // Act
-        ResponseEntity<AuthResponseDTO> result = authController.signup(testUserDTO);
+        ResponseEntity<ResponseDTO> result = authController.signup(testUserDTO);
 
         // Assert
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

@@ -48,7 +48,7 @@ public class CategoryServiceImplTest {
 
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
         testUser.setRole(Role.USER);
 
         foodCategory.setUser(testUser);

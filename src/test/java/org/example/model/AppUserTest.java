@@ -22,21 +22,21 @@ public class AppUserTest {
         // Assert
         assertThat(appUser.getId()).isNull();
         assertThat(appUser.getFullName()).isNull();
-        assertThat(appUser.getUsername()).isNull();
+        assertThat(appUser.getEmail()).isNull();
         assertThat(appUser.getPassword()).isNull();
         assertThat(appUser.getRole()).isNull();
     }
 
     @Test
-    public void testSetAndGetUsername_ShouldWorkCorrectly() {
+    public void testSetAndGetEmail_ShouldWorkCorrectly() {
         // Arrange
-        String username = "testuser";
+        String email = "test@example.com";
 
         // Act
-        appUser.setUsername(username);
+        appUser.setEmail(email);
 
         // Assert
-        assertThat(appUser.getUsername()).isEqualTo(username);
+        assertThat(appUser.getEmail()).isEqualTo(email);
     }
 
     @Test

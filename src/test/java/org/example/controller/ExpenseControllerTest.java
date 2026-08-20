@@ -61,7 +61,7 @@ public class ExpenseControllerTest {
 
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
         testUser.setRole(Role.USER);
 
         testExpense1 = new Expense();

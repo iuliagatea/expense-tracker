@@ -18,7 +18,7 @@ public class CategoryTest {
         category = new Category();
         testUser = new AppUser();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
     }
 
     @Test
@@ -75,7 +75,7 @@ public class CategoryTest {
         // Assert
         assertThat(category.getUser()).isNotNull();
         assertThat(category.getUser().getId()).isEqualTo(1L);
-        assertThat(category.getUser().getUsername()).isEqualTo("testuser");
+        assertThat(category.getUser().getEmail()).isEqualTo("testuser@example.com");
     }
 
     @Test
